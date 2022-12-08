@@ -12,7 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.98xvyli.mongodb.net/?retryWrites=true&w=majority`;
-// console.log(uri)
+console.log(uri)
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 function verifyJWT(req, res, next) {
@@ -40,22 +40,22 @@ async function run() {
 
         app.post('/jwt', (req, res) => {
             const user = req.body;
-            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '60d' })
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '7d' })
             res.send({ token })
         })
 
         app.get('/services', async (req, res) => {
             const search = req.query.search
-            console.log(search);
+            // console.log(search);
             let query = {};
-            if (search.length) {
-                query = {
-                    $text: {
-                        $search: search
-                    }
-                }
+            // if (search.length) {
+            //     query = {
+            //         $text: {
+            //             $search: search
+            //         }
+            //     }
 
-            }
+            // }
             // const query = { price: { $gt: 100, $lt: 300 } }
             // const query = { price: { $eq: 200 } }
             // const query = { price: { $lte: 200 } }
@@ -138,5 +138,5 @@ app.get('/', (req, res) => {
 })
 
 app.listen(port, () => {
-    console.log(`EnjoyTrip server running on ${port}`);
+    console.log(`enjoyTrip server running on ${port}`);
 })
