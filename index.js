@@ -38,6 +38,7 @@ async function run() {
         const serviceCollection = client.db('enjoyTrip').collection('services');
         const orderCollection = client.db('enjoyTrip').collection('orders');
         const userCollection = client.db('enjoyTrip').collection('users');
+        const categoriesCollection = client.db('enjoyTrip').collection('categories');
 
 
         // NOTE: make sure you use verifyAdmin after verifyJWT
@@ -90,9 +91,16 @@ async function run() {
             const service = await serviceCollection.findOne(query);
             res.send(service);
         });
+        app.post('/services', async (req, res) => {
+            const service = req.body;
+            const result = await serviceCollection.insertOne(service);
+            res.send(result);
+        });
 
 
         // orders api
+        ///////////////////////////////////////////////////
+
         // // app.get('/orders', verifyJWT, async (req, res) => {
         app.get('/orders', async (req, res) => {
             // const decoded = req.decoded;
@@ -104,7 +112,7 @@ async function run() {
             const email = req.query.email;
 
             // let query = {};
-            const query = { email: email};
+            const query = { email: email };
             // if (req.query.email) {
             //     query = {
             //         email: req.query.email
@@ -126,6 +134,30 @@ async function run() {
             const result = await orderCollection.insertOne(order);
             res.send(result);
         });
+        // // app.patch('/orders/:id', verifyJWT, async (req, res) => {
+        app.patch('/orders/:id', async (req, res) => {
+            const id = req.params.id;
+            const status = req.body.status
+            const query = { _id: ObjectId(id) }
+            const updatedDoc = {
+                $set: {
+                    status: status
+                }
+            }
+            const result = await orderCollection.updateOne(query, updatedDoc);
+            res.send(result);
+        });
+
+        // // app.delete('/orders/:id', verifyJWT, async (req, res) => {
+        app.delete('/orders/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await orderCollection.deleteOne(query);
+            res.send(result);
+        });
+
+        // user
+        // ///////////////////////////////////////////////////////////////////
 
         app.get('/users', async (req, res) => {
             const query = {};
@@ -192,25 +224,10 @@ async function run() {
             const result = await userCollection.updateOne(filter, updatedDoc, options);
             res.send(result);
         });
-        // // app.patch('/orders/:id', verifyJWT, async (req, res) => {
-        app.patch('/orders/:id', async (req, res) => {
-            const id = req.params.id;
-            const status = req.body.status
-            const query = { _id: ObjectId(id) }
-            const updatedDoc = {
-                $set: {
-                    status: status
-                }
-            }
-            const result = await orderCollection.updateOne(query, updatedDoc);
-            res.send(result);
-        })
 
-        // // app.delete('/orders/:id', verifyJWT, async (req, res) => {
-        app.delete('/orders/:id', async (req, res) => {
-            const id = req.params.id;
-            const query = { _id: ObjectId(id) };
-            const result = await orderCollection.deleteOne(query);
+        app.get('/categories', async (req, res) => {
+            const query = {}
+            const result = await categoriesCollection.find(query).project({ name: 1 }).toArray();
             res.send(result);
         })
 
