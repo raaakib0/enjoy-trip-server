@@ -35,23 +35,23 @@ function verifyJWT(req, res, next) {
 
 async function run() {
     try {
-        const serviceCollection = client.db('enjoyTrip').collection('services');
+        const vehicleCollection = client.db('enjoyTrip').collection('vehicles');
         const orderCollection = client.db('enjoyTrip').collection('orders');
         const userCollection = client.db('enjoyTrip').collection('users');
         const categoriesCollection = client.db('enjoyTrip').collection('categories');
 
 
         // NOTE: make sure you use verifyAdmin after verifyJWT
-        const verifyAdmin = async (req, res, next) => {
-            const decodedEmail = req.decoded.email;
-            const query = { email: decodedEmail };
-            const user = await userCollection.findOne(query);
+        // const verifyAdmin = async (req, res, next) => {
+        //     const decodedEmail = req.decoded.email;
+        //     const query = { email: decodedEmail };
+        //     const user = await userCollection.findOne(query);
 
-            if (user?.role !== 'admin') {
-                return res.status(403).send({ message: 'forbidden access' })
-            }
-            next();
-        }
+        //     if (user?.role !== 'admin') {
+        //         return res.status(403).send({ message: 'forbidden access' })
+        //     }
+        //     next();
+        // }
 
         // app.post('/jwt', (req, res) => {
         //     const user = req.body;
@@ -59,7 +59,7 @@ async function run() {
         //     res.send({ token })
         // })
 
-        app.get('/services', async (req, res) => {
+        app.get('/vehicles', async (req, res) => {
             // const search = req.query.search
             // console.log(search);
             let query = {};
@@ -79,21 +79,28 @@ async function run() {
             // const query = { price: { $nin: [20, 40, 150] } }
             // const query = { $and: [{price: {$gt: 20}}, {price: {$gt: 100}}] }
             // const order = req.query.order === 'asc' ? 1 : -1;
-            // const cursor = serviceCollection.find(query).sort({ price: order });
-            const cursor = serviceCollection.find(query);
-            const services = await cursor.toArray();
-            res.send(services);
+            // const cursor = vehicleCollection.find(query).sort({ price: order });
+            const cursor = vehicleCollection.find(query);
+            const vehicles = await cursor.toArray();
+            res.send(vehicles);
         });
 
-        app.get('/services/:id', async (req, res) => {
+        app.get('/vehicles/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
-            const service = await serviceCollection.findOne(query);
-            res.send(service);
+            const vehicle = await vehicleCollection.findOne(query);
+            res.send(vehicle);
         });
-        app.post('/services', async (req, res) => {
-            const service = req.body;
-            const result = await serviceCollection.insertOne(service);
+        app.post('/vehicles', async (req, res) => {
+            const vehicle = req.body;
+            const result = await vehicleCollection.insertOne(vehicle);
+            res.send(result);
+        });
+        // app.delete('/doctors/:id', verifyJWT, verifyAdmin, async (req, res) => {
+        app.delete('/vehicles/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await vehicleCollection.deleteOne(filter);
             res.send(result);
         });
 
@@ -178,6 +185,13 @@ async function run() {
             const result = await userCollection.insertOne(user);
             res.send(result);
         });
+        app.delete('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            // console.log(id);
+            const filter = { _id: ObjectId(id) };
+            const result = await userCollection.deleteOne(filter);
+            res.send(result);
+        });
 
         // app.patch('/users/:id', async (req, res) => {
         //     const id = req.params.id;
@@ -220,9 +234,24 @@ async function run() {
                 $set: {
                     role2: 'seller'
                 }
+               
             }
             const result = await userCollection.updateOne(filter, updatedDoc, options);
             res.send(result);
+        });
+        app.put('/users/:email', async (req, res) => {
+            const email = req.params.email;
+            console.log(email)
+            
+            // const filter = { email: ObjectId(email) }
+            // const options = { upsert: true };
+            // const updatedDoc = {
+            //     $set: {
+            //         role2: 'seller'
+            //     }
+            // }
+            // const result = await userCollection.updateOne(filter, updatedDoc, options);
+            // res.send(result);
         });
 
         app.get('/categories', async (req, res) => {
