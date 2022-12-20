@@ -62,15 +62,23 @@ async function run() {
         app.get('/vehicles', async (req, res) => {
             // const search = req.query.search
             // console.log(search);
-            let query = {};
+            // let query = {};
             // if (search.length) {
             //     query = {
             //         $text: {
             //             $search: search
             //         }
             //     }
+            const email = req.query.email;
+            // console.log(email)
 
-            // }
+    
+            const query = { email: email };
+      
+            const cursor = vehicleCollection.find(query);
+            const vehicles = await cursor.toArray();
+            // res.send(mvehicles);
+            
             // const query = { price: { $gt: 100, $lt: 300 } }
             // const query = { price: { $eq: 200 } }
             // const query = { price: { $lte: 200 } }
@@ -80,9 +88,46 @@ async function run() {
             // const query = { $and: [{price: {$gt: 20}}, {price: {$gt: 100}}] }
             // const order = req.query.order === 'asc' ? 1 : -1;
             // const cursor = vehicleCollection.find(query).sort({ price: order });
+
+
+            // const cursor = vehicleCollection.find(query);
+            // const vehicles = await cursor.toArray();
+            res.send( vehicles);
+        });
+        app.get('/vehicles2', async (req, res) => {
+            // const search = req.query.search
+            // console.log(search);
+            let query = {};
+            // if (search.length) {
+            //     query = {
+            //         $text: {
+            //             $search: search
+            //         }
+            //     }
+            // const email = req.query.email;
+            // console.log(email)
+
+    
+            // const query = { email: email };
+      
             const cursor = vehicleCollection.find(query);
             const vehicles = await cursor.toArray();
-            res.send(vehicles);
+            // res.send(mvehicles);
+            
+            // const query = { price: { $gt: 100, $lt: 300 } }
+            // const query = { price: { $eq: 200 } }
+            // const query = { price: { $lte: 200 } }
+            // const query = { price: { $ne: 150 } }
+            // const query = { price: { $in: [20, 40, 150] } }
+            // const query = { price: { $nin: [20, 40, 150] } }
+            // const query = { $and: [{price: {$gt: 20}}, {price: {$gt: 100}}] }
+            // const order = req.query.order === 'asc' ? 1 : -1;
+            // const cursor = vehicleCollection.find(query).sort({ price: order });
+
+
+            // const cursor = vehicleCollection.find(query);
+            // const vehicles = await cursor.toArray();
+            res.send( vehicles);
         });
 
         app.get('/vehicles/:id', async (req, res) => {
@@ -120,6 +165,26 @@ async function run() {
 
             // let query = {};
             const query = { email: email };
+            // if (req.query.email) {
+            //     query = {
+            //         email: req.query.email
+            //     }
+            // }
+            const cursor = orderCollection.find(query);
+            const orders = await cursor.toArray();
+            res.send(orders);
+        });
+        app.get('/orders2', async (req, res) => {
+            // const decoded = req.decoded;
+
+            // if (decoded.email !== req.query.email) {
+            //     res.status(403).send({ message: 'unauthorized access' })
+            // }
+
+            const sellerEmail = req.query.sellerEmail;
+
+            // let query = {};
+            const query = { sellerEmail: sellerEmail };
             // if (req.query.email) {
             //     query = {
             //         email: req.query.email
