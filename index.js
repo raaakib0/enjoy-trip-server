@@ -58,40 +58,20 @@ async function run() {
         //     const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '7d' })
         //     res.send({ token })
         // })
-
-        app.get('/vehicles', async (req, res) => {
-            // const search = req.query.search
-            // console.log(search);
-            // let query = {};
-            // if (search.length) {
-            //     query = {
-            //         $text: {
-            //             $search: search
-            //         }
-            //     }
-            const email = req.query.email;
-            // console.log(email)
-
-    
-            const query = { email: email };
-      
+        app.get('/vehicles3', async (req, res) => {
+            const categorie = req.query.categorie;
+            // console.log(categorie)
+            const query = { categorie: categorie };
             const cursor = vehicleCollection.find(query);
             const vehicles = await cursor.toArray();
-            // res.send(mvehicles);
-            
-            // const query = { price: { $gt: 100, $lt: 300 } }
-            // const query = { price: { $eq: 200 } }
-            // const query = { price: { $lte: 200 } }
-            // const query = { price: { $ne: 150 } }
-            // const query = { price: { $in: [20, 40, 150] } }
-            // const query = { price: { $nin: [20, 40, 150] } }
-            // const query = { $and: [{price: {$gt: 20}}, {price: {$gt: 100}}] }
-            // const order = req.query.order === 'asc' ? 1 : -1;
-            // const cursor = vehicleCollection.find(query).sort({ price: order });
-
-
-            // const cursor = vehicleCollection.find(query);
-            // const vehicles = await cursor.toArray();
+            res.send(vehicles);
+        });
+        app.get('/vehicles', async (req, res) => {
+            const email = req.query.email;
+            // console.log(email)
+            const query = { email: email };
+            const cursor = vehicleCollection.find(query);
+            const vehicles = await cursor.toArray();
             res.send( vehicles);
         });
         app.get('/vehicles2', async (req, res) => {
@@ -152,7 +132,11 @@ async function run() {
 
         // orders api
         ///////////////////////////////////////////////////
-
+        app.get('/orders3', async (req, res) => {
+            const query = {};
+            const orders = await orderCollection.find(query).toArray();
+            res.send(orders);
+        });
         // // app.get('/orders', verifyJWT, async (req, res) => {
         app.get('/orders', async (req, res) => {
             // const decoded = req.decoded;
@@ -322,6 +306,11 @@ async function run() {
         app.get('/categories', async (req, res) => {
             const query = {}
             const result = await categoriesCollection.find(query).project({ name: 1 }).toArray();
+            res.send(result);
+        });
+        app.get('/categories2', async (req, res) => {
+            const query = {}
+            const result = await categoriesCollection.find(query).toArray();
             res.send(result);
         })
 
