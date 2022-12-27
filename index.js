@@ -3,6 +3,8 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -39,6 +41,7 @@ async function run() {
         const orderCollection = client.db('enjoyTrip').collection('orders');
         const userCollection = client.db('enjoyTrip').collection('users');
         const categoriesCollection = client.db('enjoyTrip').collection('categories');
+        const paymentsCollection = client.db('enjoyTrip').collection('payments');
 
 
         // NOTE: make sure you use verifyAdmin after verifyJWT
@@ -209,6 +212,42 @@ async function run() {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const result = await orderCollection.deleteOne(query);
+            res.send(result);
+        });
+
+        // Payment/////////////////////////////////////////////////////////////
+        app.post('/create-payment-intent', async (req, res) => {
+            const totalAmount = req.body;
+            const price = totalAmount.total;
+            // console.log(price)
+            const amount = price * 100;
+
+            const paymentIntent = await stripe.paymentIntents.create({
+                currency: 'usd',
+                amount: amount,
+                "payment_method_types": [
+                    "card"
+                ]
+            });
+            res.send({
+                clientSecret: paymentIntent.client_secret,
+            });
+        });
+
+        app.post('/payments', async (req, res) => {
+            const payment = req.body;
+            const result = await paymentsCollection.insertOne(payment);
+            const email = payment.email
+            // console.log(email)
+            const filter = { email: email}
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    paid: true,
+                    transactionId: payment.transactionId
+                }
+            }
+            const updatedResult = await orderCollection.updateMany(filter, updatedDoc,options)
             res.send(result);
         });
 
