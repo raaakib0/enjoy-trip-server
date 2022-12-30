@@ -330,6 +330,18 @@ async function run() {
             const result = await userCollection.updateOne(filter, updatedDoc, options);
             res.send(result);
         });
+        app.put('/users/removeAdmin/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    role: 'Remove Admin'
+                }
+            }
+            const result = await userCollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+        });
         app.put('/users/seller/:id', async (req, res) => {
             const id = req.params.id;
             const filter = { _id: ObjectId(id) }
@@ -337,6 +349,19 @@ async function run() {
             const updatedDoc = {
                 $set: {
                     role2: 'seller'
+                }
+               
+            }
+            const result = await userCollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+        });
+        app.put('/users/removeSeller/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    role2: true
                 }
                
             }
