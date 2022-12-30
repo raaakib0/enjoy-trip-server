@@ -131,6 +131,22 @@ async function run() {
             const result = await vehicleCollection.deleteOne(filter);
             res.send(result);
         });
+        app.put('/updateVehicle/:id', async (req, res) => {
+            const id = req.params.id;
+            const body = req.body;
+            console.log(body)
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    name: body.name,
+                    price: body.price,
+                    description: body.description
+                }
+            }
+            const result = await vehicleCollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+        });
 
 
         // orders api
