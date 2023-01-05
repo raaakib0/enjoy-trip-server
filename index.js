@@ -76,7 +76,7 @@ async function run() {
                 subject: `Your Vehicle ${vehicleName} is Ordered`, // Subject line
                 text: "Hello world!", // plain text body
                 html: `
-        <h3>Your Vehicle is confirmed</h3>
+        <h3>Your Vehicle is ordered</h3>
         <div>
             <p>Your Vehicle : ${vehicleName}</p>
             <p> Date: ${startDate} for ${days} Days</p>
