@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
+const mg = require('nodemailer-mailgun-transport');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
@@ -42,9 +44,55 @@ async function run() {
         const userCollection = client.db('enjoyTrip').collection('users');
         const categoriesCollection = client.db('enjoyTrip').collection('categories');
         const paymentsCollection = client.db('enjoyTrip').collection('payments');
+        
+        
+        // mail send function
+
+        function sendBookingEmail(order) {
+            const { email, sellerEmail,vehicleName, startDate, days } = order;
+
+            const auth = {
+                auth: {
+                    api_key: process.env.EMAIL_SEND_KEY,
+                    domain: process.env.EMAIL_SEND_DOMAIN
+                }
+            }
+
+            const transporter = nodemailer.createTransport(mg(auth));
 
 
-        // NOTE: make sure you use verifyAdmin after verifyJWT
+            // let transporter = nodemailer.createTransport({
+            //     host: 'smtp.sendgrid.net',
+            //     port: 587,
+            //     auth: {
+            //         user: "apikey",
+            //         pass: process.env.SENDGRID_API_KEY
+            //     }
+            // });
+            console.log('sending email', email)
+            transporter.sendMail({
+                from: "enjoy.trip@gmail.com", // verified sender email
+                to: email || 'raaakib0@gmail.com', // recipient email
+                subject: `Your Vehicle ${vehicleName} is Ordered`, // Subject line
+                text: "Hello world!", // plain text body
+                html: `
+        <h3>Your Vehicle is confirmed</h3>
+        <div>
+            <p>Your Vehicle : ${vehicleName}</p>
+            <p> Date: ${startDate} for ${days} Days</p>
+            <p>Thanks from Enjoy Trip.</p>
+        </div>
+        
+        `, // html body
+            }, function (error, info) {
+                if (error) {
+                    console.log('Email send error', error);
+                } else {
+                    console.log('Email sent: ' + info);
+                }
+            });
+        }
+
         // const verifyAdmin = async (req, res, next) => {
         //     const decodedEmail = req.decoded.email;
         //     const query = { email: decodedEmail };
@@ -75,7 +123,7 @@ async function run() {
             const query = { email: email };
             const cursor = vehicleCollection.find(query);
             const vehicles = await cursor.toArray();
-            res.send( vehicles);
+            res.send(vehicles);
         });
         app.get('/vehicles2', async (req, res) => {
             // const search = req.query.search
@@ -90,13 +138,13 @@ async function run() {
             // const email = req.query.email;
             // console.log(email)
 
-    
+
             // const query = { email: email };
-      
+
             const cursor = vehicleCollection.find(query);
             const vehicles = await cursor.toArray();
             // res.send(mvehicles);
-            
+
             // const query = { price: { $gt: 100, $lt: 300 } }
             // const query = { price: { $eq: 200 } }
             // const query = { price: { $lte: 200 } }
@@ -110,7 +158,7 @@ async function run() {
 
             // const cursor = vehicleCollection.find(query);
             // const vehicles = await cursor.toArray();
-            res.send( vehicles);
+            res.send(vehicles);
         });
 
         app.get('/vehicles/:id', async (req, res) => {
@@ -151,6 +199,7 @@ async function run() {
 
         // orders api
         ///////////////////////////////////////////////////
+
         app.get('/orders3', async (req, res) => {
             const query = {};
             const orders = await orderCollection.find(query).toArray();
@@ -163,9 +212,7 @@ async function run() {
             // if (decoded.email !== req.query.email) {
             //     res.status(403).send({ message: 'unauthorized access' })
             // }
-
             const email = req.query.email;
-
             // let query = {};
             const query = { email: email };
             // if (req.query.email) {
@@ -183,9 +230,7 @@ async function run() {
             // if (decoded.email !== req.query.email) {
             //     res.status(403).send({ message: 'unauthorized access' })
             // }
-
             const sellerEmail = req.query.sellerEmail;
-
             // let query = {};
             const query = { sellerEmail: sellerEmail };
             // if (req.query.email) {
@@ -207,6 +252,7 @@ async function run() {
         app.post('/orders', async (req, res) => {
             const order = req.body;
             const result = await orderCollection.insertOne(order);
+            sendBookingEmail(order)
             res.send(result);
         });
         // // app.patch('/orders/:id', verifyJWT, async (req, res) => {
@@ -255,7 +301,7 @@ async function run() {
             const result = await paymentsCollection.insertOne(payment);
             const email = payment.email
             // console.log(email)
-            const filter = { email: email}
+            const filter = { email: email }
             const options = { upsert: true };
             const updatedDoc = {
                 $set: {
@@ -263,7 +309,7 @@ async function run() {
                     transactionId: payment.transactionId
                 }
             }
-            const updatedResult = await orderCollection.updateMany(filter, updatedDoc,options)
+            const updatedResult = await orderCollection.updateMany(filter, updatedDoc, options)
             res.send(result);
         });
 
@@ -350,7 +396,7 @@ async function run() {
                 $set: {
                     role2: 'seller'
                 }
-               
+
             }
             const result = await userCollection.updateOne(filter, updatedDoc, options);
             res.send(result);
@@ -363,7 +409,7 @@ async function run() {
                 $set: {
                     role2: true
                 }
-               
+
             }
             const result = await userCollection.updateOne(filter, updatedDoc, options);
             res.send(result);
@@ -371,7 +417,7 @@ async function run() {
         app.put('/users/:email', async (req, res) => {
             const email = req.params.email;
             console.log(email)
-            
+
             // const filter = { email: ObjectId(email) }
             // const options = { upsert: true };
             // const updatedDoc = {
