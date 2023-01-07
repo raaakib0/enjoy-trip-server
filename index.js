@@ -126,15 +126,16 @@ async function run() {
             res.send(vehicles);
         });
         app.get('/vehicles2', async (req, res) => {
-            // const search = req.query.search
+            const search = req.query.search
             // console.log(search);
             let query = {};
-            // if (search.length) {
-            //     query = {
-            //         $text: {
-            //             $search: search
-            //         }
-            //     }
+            if (search.length) {
+                query = {
+                    $text: {
+                        $search: search
+                    }
+                }
+            }
             // const email = req.query.email;
             // console.log(email)
 
@@ -143,7 +144,6 @@ async function run() {
 
             const cursor = vehicleCollection.find(query);
             const vehicles = await cursor.toArray();
-            // res.send(mvehicles);
 
             // const query = { price: { $gt: 100, $lt: 300 } }
             // const query = { price: { $eq: 200 } }
@@ -155,9 +155,6 @@ async function run() {
             // const order = req.query.order === 'asc' ? 1 : -1;
             // const cursor = vehicleCollection.find(query).sort({ price: order });
 
-
-            // const cursor = vehicleCollection.find(query);
-            // const vehicles = await cursor.toArray();
             res.send(vehicles);
         });
 
