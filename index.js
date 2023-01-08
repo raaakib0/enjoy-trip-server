@@ -157,6 +157,15 @@ async function run() {
 
             res.send(vehicles);
         });
+        app.get('/vehicles4', async (req, res) => {
+        
+            let query = {};
+           
+            const cursor = vehicleCollection.find(query);
+            const vehicles = await cursor.toArray();
+
+            res.send(vehicles);
+        });
 
         app.get('/vehicles/:id', async (req, res) => {
             const id = req.params.id;
